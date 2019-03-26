@@ -2,48 +2,24 @@ ffmpeg-windows-build-helpers
 ============================
 
 This helper script lets you cross compile a windows-based 32 or 64-bit version of ffmpeg/mplayer/mp4box.exe, etc,  including their dependencies and libraries that they use.
-Note that I do offer custom builds, typically $200. Ping me at rogerdpack@gmail.com and I'll do the work for you :) 
+Note that I do offer custom builds, price negotiable. Ping me at rogerdpack@gmail.com and I'll do the work for you :) 
 
-The script allows the user to either build on Windows via cygwin (as documented below), or on a Linux host (which uses cross compiles to build windows binaries).
+The script allows the user to either build on a Linux host (which uses cross compiles to build windows binaries).  Windows users can use windows bash or virtualbox.
 Building on linux takes less time overall. On Windows 10, you can use the bash shell (provided that you've installed the Windows Subsystem for Linux as explained [here](http://www.howtogeek.com/249966/how-to-install-and-use-the-linux-bash-shell-on-windows-10/).
-Building in windows takes considerably longer but avoids the need of deploying a  Linux installation for the same purpose.
+Building in windows takes longer but avoids the need of deploying a  Linux installation for the same purpose.
 I do have some "distribution release builds" of running the script here: https://sourceforge.net/projects/ffmpegwindowsbi/files
 
-** Windows Cmd  **
-
-To build in windows without a VM (uses the native'ish cygwin):
-
-Obtain the repository by downloading and unzipping the archive below: 
-       
-https://github.com/rdp/ffmpeg-windows-build-helpers/archive/master.zip
-       
-Or, if you have git installed, clone the repository: 
-
-     c:\>git clone https://github.com/rdp/ffmpeg-windows-build-helpers.git
-       
-Next run one of the "`native_build/build_locally_XXX.bat`" file.
-* `build_locally_fdk_aac_and_x264_32bit_fast`: This will build libx264, fdk aac, and FFmpeg, and takes about 1 hour. This is the easiest way to get fdk aac, if you don't know which you want, use this one.
-* `build_locally_with_various_option_prompts`: This will build FFmpeg and extra dependencies and  libraries.  It will prompt whether you'd like to also include fdk/nvenc libraries, 32 and/or 64 bit executables, etc.  This build will take 6 hours or more.
-* `build_locally_gpl_32_bit_option`: Same as option prompts above, but selects 32bit non-fdk automatically.
-
 **Cross-compiling from a Linux environment:**
-  
-You can build the project on Linux with a cross compiler toolchain, and this process is much faster, taking about 2 hours for the "options" build. Deploy a Linux VM on the host with a hypervisor of your choice, or natively on an extra computer or a dual boot system, and also, you could even create a VM temporarily, on a hosting provider such as Digital Ocean. 
 
-NB: works with Ubuntu distros that uses gcc 5.x but not 6.x (yet) (i.e. 16.10 it will not work yet).
+You can build the project on Linux with a cross compiler toolchain, taking about 2 hours for the "options" build. 
+
+Deploy a Linux VM on the host of your choice (> 14.04 for Ubuntu), or natively on an extra computer or a dual boot system, and also, you could even create a VM temporarily, on a hosting provider such as Digital Ocean.  Cheapest way: install windows 10 bash shell.  Another option: linux on a virtualbox VM.  Another option, typically fastest: temporarily rent a box (ex: DigitalOcean https://m.do.co/c/b3030b559d17 )
 
 Download the script by cloning this repository via git:
 
     $ git clone https://github.com/rdp/ffmpeg-windows-build-helpers.git
     $ cd ffmpeg-windows-build-helpers
 
-Or do the following in a bash prompt instead of git clone:
-
-    $ mkdir ffmpeg_build
-    $ cd ffmpeg_build
-    $ wget https://raw.github.com/rdp/ffmpeg-windows-build-helpers/master/cross_compile_ffmpeg.sh -O cross_compile_ffmpeg.sh
-    $ chmod u+x cross_compile_ffmpeg.sh
-    
  Now run the script:
     
     $ ./cross_compile_ffmpeg.sh
@@ -55,9 +31,9 @@ Another option instead of running `./cross_compile_ffmpeg.sh` is to run
 
     $ native_build/quick_cross_compile_ffmpeg_fdk_aac_and_x264_using_packaged_mingw64.sh script.
 
-Note the "quick" part here which attempts to use the locally installed `mingw-w64` package from the distribution for the cross compiler, thus skipping the time-intensive cross-compiler toolchain build step.
+Note the "quick" part here which attempts to use the locally installed `mingw-w64` package from your distribution for the cross compiler, thus skipping the time-intensive cross-compiler toolchain build step.  It's not as well tested as running the normal one, however, which builds gcc from scratch.
 
-For Mac OSX users, simply follow the instructions for Linux above. The cross-compilation will work just fine.
+For Mac OSX users, simply follow the instructions for Linux above.
 
 To view additional arguments and options supported by the script, run:
 
@@ -65,7 +41,9 @@ To view additional arguments and options supported by the script, run:
 
 to see all the various options available.
 
- For long running builds, do run them overnight as they take a while.
+For long running builds, do run them overnight as they take a while.
+
+If you want to build a "shared" build (there's a command line option for that :) then link it into your MSVC project see https://ffmpeg.zeranoe.com/forum/viewtopic.php?f=5&t=796&p=4095#p4095
 
 Also note that you can also "cross compile" mp4box, mplayer,mencoder and vlc binaries if you pass in the appropriate command line parameters.
 The VLC build is currently broken, send a PM if you'd want it fixed.
@@ -95,7 +73,8 @@ Then use the output shown (in this case, `core-avx-i`, corresponding to Intel's 
 
     % gcc -march=core-avx-i ...
 
-Benchmarks prove that modifying the CFLAGS this way (at least using libx264) doesn't end up helping much speed-wise (it might make a smaller executable?) since libx264 auto detects and auto uses your cpu capabilities anyway, so until further research is done, these options may not actually provide significant speedup.  Ping me if you get different results than this, as you may be wasting your time using the `--cflags=` parameter here.
+Benchmarks prove that modifying the CFLAGS this way (at least using libx264) doesn't end up helping much speed-wise (it might make a smaller executable?) since libx264 auto detects and auto uses your cpu capabilities anyway, so until further research is done, these options may not actually provide significant or any speedup, while making the executable "undistributable" since it can only be run on certain cpu's, but it's fun!
+Ping me if you get different results than this, as you may be wasting your time using the `--cflags=` parameter here.
 
 Note that the build scripts fetch stable sources (not mainline) which may contain slightly older/out of date dependency versions, and as such, there may be implied security risks (see CVEs that may not be patched downstream), though FFmpeg itself will be built from git master by default.
 
